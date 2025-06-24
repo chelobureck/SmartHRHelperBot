@@ -1,7 +1,7 @@
 from aiogram import Router, F, types
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery, ForceReply
-from config import ADMIN_ID, ADMIN_IDS
+from config import ADMIN_IDS
 from database.models import get_applications, get_application, update_application_status, delete_application
 from keyboards.admin import admin_menu_kb
 

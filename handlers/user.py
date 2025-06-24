@@ -6,19 +6,11 @@ from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
 from keyboards.user import main_menu_kb, cancel_kb
 from utils.validators import is_valid_email, is_valid_phone
 from database.models import add_application
-from config import ADMIN_ID, SUPPORT_EMAIL
+from config import ADMIN_IDS, SUPPORT_EMAIL
 from aiogram import Bot
 import logging
 
 router = Router()
-
-class ApplicationFSM(StatesGroup):
-    full_name = State()
-    email = State()
-    phone = State()
-    skills = State()
-    portfolio = State()
-    resume = State()
 
 WELCOME_TEXT = (
     "👋 Привет! Я бот-рекрутер SmartHRHelperBot.\n"
@@ -42,6 +34,14 @@ def user_info_str(user):
         f"\n====================================================\n"
     )
 
+class ApplicationFSM(StatesGroup):
+    full_name = State()
+    email = State()
+    phone = State()
+    skills = State()
+    portfolio = State()
+    resume = State()
+
 @router.message(Command("start"))
 async def cmd_start(message: Message) -> None:
     """Обработка команды /start"""
@@ -55,7 +55,7 @@ async def cmd_help(message: Message) -> None:
     await message.answer(HELP_TEXT)
 
 @router.message(Command("support"))
-async def cmd_support(message: Message):
+async def cmd_support(message: Message) -> None:
     await message.answer(f"Связь с HR: {SUPPORT_EMAIL}")
 
 @router.message(F.text == "Откликнуться на вакансию")
@@ -122,7 +122,8 @@ async def process_resume(message: Message, state: FSMContext, bot: Bot):
     await message.answer("✅ Ваша заявка отправлена! Мы свяжемся с вами.", reply_markup=main_menu_kb())
     # Уведомление админу
     text = f"Новая заявка!\nФИО: {data['full_name']}\nEmail: {data['email']}\nТелефон: {data['phone']}\nНавыки: {data['skills']}"
-    await bot.send_message(ADMIN_ID, text)
+    for admin_id in ADMIN_IDS:
+        await bot.send_message(admin_id, text)
 
 @router.message(F.text == "Отмена")
 async def cancel(message: Message, state: FSMContext) -> None:
